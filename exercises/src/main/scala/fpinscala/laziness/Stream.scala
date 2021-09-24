@@ -17,18 +17,51 @@ trait Stream[+A] {
     case Empty => None
     case Cons(h, t) => if (f(h())) Some(h()) else t().find(f)
   }
-  def take(n: Int): Stream[A] = ???
+  def take(n: Int): Stream[A] = this match {
+    case Cons(h, t) if n > 1 => cons(h(), t().take(n - 1))
+    case Cons(h, _) if n == 1 => cons(h(), empty)
+    case Empty => throw new Exception("Not enough elements in stream")
+  }
 
-  def drop(n: Int): Stream[A] = ???
+  def drop(n: Int): Stream[A] = this match {
+    case Cons(_, t) if n > 0 => t().drop(n - 1)
+    case Cons(_, t) if n == 0 => t()
+    case Empty => throw new Exception("Not enough elements in stream")
+  }
 
-  def takeWhile(p: A => Boolean): Stream[A] = ???
+  def takeWhile(p: A => Boolean): Stream[A] = this match {
+    case Cons(h, t) if p(h()) => cons(h(), t().takeWhile(p))
+    case _ => empty
+  }
 
-  def forAll(p: A => Boolean): Boolean = ???
+  def takeWhileFR(p: A => Boolean): Stream[A] =
+    foldRight(empty[A])((a,b) => if (p(a)) cons(a, b) else b)
+
+  def forAll(p: A => Boolean): Boolean =
+    foldRight(true)((a,b) => p(a) && b)
 
   def headOption: Option[A] = ???
 
+  def toList: List[A] =
+    this match {
+      case Cons(h, t) => h() :: t().toList
+      case _ => List.empty[A]
+    }
+
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
+
+  def map[B](f: A => B): Stream[B] =
+    foldRight(empty[B])((a,b) => cons(f(a), b))
+
+  def filter(f: A => Boolean): Stream[A] =
+    foldRight(empty[A])((a,b) => if (f(a)) cons(a, b) else b)
+
+  def append[B>:A](s: => Stream[B]): Stream[B] =
+    foldRight(s)((h,t) => cons(h,t))
+
+  def flatMap[B](f: A => Stream[B]): Stream[B] =
+    foldRight(empty[B])((a,b) => f(a) append b)
 
   def startsWith[B](s: Stream[B]): Boolean = ???
 }
@@ -47,6 +80,9 @@ object Stream {
   def apply[A](as: A*): Stream[A] =
     if (as.isEmpty) empty 
     else cons(as.head, apply(as.tail: _*))
+
+  def constant[A](a: A): Stream[A] =
+    Stream.cons(a, constant(a))
 
   val ones: Stream[Int] = Stream.cons(1, ones)
   def from(n: Int): Stream[Int] = ???
