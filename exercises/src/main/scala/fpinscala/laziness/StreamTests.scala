@@ -64,6 +64,27 @@ object StreamTests {
     printHeader("5.8")
     val threes = constant(3)
     println(s"constant(3).take(5) = ${threes.take(5).toList}")
+
+    printHeader("5.9")
+    println(s"Stream.from(1).take(10).toList = ${Stream.from(1).take(10).toList}")
+
+    printHeader("5.10")
+    println(s"Stream.fibs().take(10).toList = ${Stream.fibs().take(10).toList}")
+
+    printHeader("5.12 & 5.13")
+    println(s"Stream.fibsWithUnfold().takeWithUnfold(10).toList = ${Stream.fibsWithUnfold().takeWithUnfold(10).toList}")
+    println(s"Stream.fromWithUnfold(1).takeWithUnfold(10).toList = ${Stream.fromWithUnfold(1).takeWithUnfold(10).toList}")
+    println(s"constantWithUnfold(3).takeWithUnfold(5) = ${constantWithUnfold(3).takeWithUnfold(5).toList}")
+    println(s"${stream3.toList}.takeWithUnfold(6) = ${stream3.takeWithUnfold(6).toList}")
+    println("constantWithUnfold(3).zipWith(constantWithUnfold(10))(_ * _).take(5).toList = " +
+      s"${constantWithUnfold(3).zipWith(constantWithUnfold(10))(_ * _).take(5).toList}")
+
+    println(s"${stream2.toList}.zipAll(${stream3.toList}).toList = " +
+      s"${stream2.zipAll(stream3).toList}")
+
+
+    printHeader("5.15")
+    println(s"${stream3.toList}.tails = ${stream3.tails.toList.map(_.toList)}")
   }
 
 }
